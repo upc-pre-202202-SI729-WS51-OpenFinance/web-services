@@ -1,4 +1,5 @@
 package com.pokeswap.webservice.security.interfaces.rest.controllers;
+import com.pokeswap.webservice.security.domain.service.AuthenticationService;
 import com.pokeswap.webservice.security.domain.service.UserService;
 import com.pokeswap.webservice.security.domain.service.communication.AuthenticateRequest;
 import com.pokeswap.webservice.security.domain.service.communication.RegisterRequest;
@@ -20,34 +21,33 @@ import javax.validation.Valid;
 @RequestMapping("/api/v1/users")
 public class UsersController {
     private final UserService userService;
+
     private final UserMapper userMapper;
 
-    public UsersController(UserService userService, UserMapper userMapper) {
+    private AuthenticationService authenticationService;
+
+    public UsersController(UserService userService, UserMapper userMapper, AuthenticationService authenticationService) {
         this.userService = userService;
         this.userMapper = userMapper;
-    }
-    @RequestMapping("/")
-    @ResponseBody
-    public String home() {
-        return "Welcome home!";
+        this.authenticationService = authenticationService;
     }
 
     @PostMapping("/auth/sign-in")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthenticateRequest request) {
-        return userService.authenticate(request);
+        return authenticationService.authenticate(request);
     }
 
     @PostMapping("/auth/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
-        return userService.register(request);
+        return authenticationService.register(request);
     }
 
-    @GetMapping("/get-all")
+    @GetMapping()
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public Page<UserResource> getAllUsers(Pageable pageable) {
-        return userMapper.modelListToPage(userService.getAll(), pageable);
+        return userMapper.modelListPage(userService.getAll(), pageable);
     }
 }

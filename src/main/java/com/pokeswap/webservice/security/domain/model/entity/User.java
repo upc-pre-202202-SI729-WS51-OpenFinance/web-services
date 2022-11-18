@@ -6,6 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,17 +24,20 @@ public class User extends AuditModel {
     private Long id;
 
     @NotBlank
+    @NotNull
     @Size(max = 50)
     @Column(unique = true)
     private String username;
 
     @NotBlank
+    @NotNull
     @Size(max = 50)
     @Column(unique = true)
     @Email
     private String email;
 
     @NotBlank
+    @NotNull
     @Size(max = 120)
     private String password;
 

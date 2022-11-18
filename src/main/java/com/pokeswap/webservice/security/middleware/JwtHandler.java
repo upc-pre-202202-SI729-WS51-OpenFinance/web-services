@@ -1,5 +1,8 @@
 package com.pokeswap.webservice.security.middleware;
+
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
 
 
@@ -20,25 +24,40 @@ public class JwtHandler {
     @Value("${authorization.jwt.expiration.days}")
     private int expirationDays;
 
+
+
     public String generateToken(Authentication authentication) {
+
         String subject = ((UserDetailsImpl) authentication.getPrincipal()).getUsername();
         Date issuedAt = new Date();
         Date expiration = DateUtils.addDays(issuedAt, expirationDays);
+
+        Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+
         return Jwts.builder()
                 .setSubject(subject)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
-                .signWith(SignatureAlgorithm.ES256, secret)
+                .signWith(secretKey,SignatureAlgorithm.ES256)
                 .compact();
     }
 
     public String getUsernameFrom(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+        Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        return Jwts.parserBuilder()
+                .setSigningKey(secret.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secret)
+            Jwts.parserBuilder()
+                    .setSigningKey(secret.getBytes())
+                    .build()
                     .parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
@@ -53,5 +72,6 @@ public class JwtHandler {
             logger.error("JSON Web Token claims string is empty: {}", e.getMessage());
         }
         return false;
+
     }
 }

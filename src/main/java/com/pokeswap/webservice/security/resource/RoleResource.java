@@ -1,9 +1,6 @@
 package com.pokeswap.webservice.security.resource;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.With;
+import lombok.*;
 
 @Getter
 @Setter
