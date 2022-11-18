@@ -33,18 +33,20 @@ public class UsersController {
     }
 
     @PostMapping("/auth/sign-in")
+    @PreAuthorize("permitAll()")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthenticateRequest request) {
         return authenticationService.authenticate(request);
     }
 
     @PostMapping("/auth/sign-up")
+    @PreAuthorize("permitAll()")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
         return authenticationService.register(request);
     }
 
-    @GetMapping()
+    @GetMapping("/get-all")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public Page<UserResource> getAllUsers(Pageable pageable) {
